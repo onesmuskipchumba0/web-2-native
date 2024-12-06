@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
 import { FaHome, FaCode, FaBook } from 'react-icons/fa'
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import './App.css'
 
 // Pages
@@ -24,6 +24,8 @@ const Converter = () => {
   const [isConverting, setIsConverting] = useState(false)
   const [error, setError] = useState(null)
   const [showToast, setShowToast] = useState(false)
+  const [isDragging, setIsDragging] = useState(false)
+  const fileInputRef = useRef(null)
 
   const formatCode = (code) => {
     // Basic indentation and formatting
@@ -140,9 +142,50 @@ const Converter = () => {
     }
   }
 
+  const handleFileUpload = (file) => {
+    if (!file) return
+
+    if (!file.name.endsWith('.js') && !file.name.endsWith('.jsx')) {
+      setError('Please upload a .js or .jsx file')
+      return
+    }
+
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      try {
+        const content = e.target.result
+        setInputCode(content)
+        setError(null)
+      } catch (err) {
+        setError('Error reading file: ' + err.message)
+      }
+    }
+    reader.onerror = () => {
+      setError('Error reading file')
+    }
+    reader.readAsText(file)
+  }
+
+  const handleDragOver = (e) => {
+    e.preventDefault()
+    setIsDragging(true)
+  }
+
+  const handleDragLeave = (e) => {
+    e.preventDefault()
+    setIsDragging(false)
+  }
+
+  const handleDrop = (e) => {
+    e.preventDefault()
+    setIsDragging(false)
+    const file = e.dataTransfer.files[0]
+    handleFileUpload(file)
+  }
+
   return (
     <>
-      {/* Toast Container - Fixed position outside the main content */}
+      {/* Toast Container */}
       <div className="fixed top-4 right-4 z-50">
         {showToast && (
           <div className="alert alert-success shadow-lg animate-fadeIn">
@@ -169,14 +212,54 @@ const Converter = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div className="card bg-base-200">
             <div className="card-body">
-              <h2 className="card-title">Input React JS Code</h2>
-              <textarea 
-                className="textarea textarea-bordered h-96 font-mono text-sm whitespace-pre"
-                placeholder="Paste your React JS code here..."
-                value={inputCode}
-                onChange={(e) => setInputCode(e.target.value)}
-                style={{ tabSize: 2 }}
-              />
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="card-title">Input React JS Code</h2>
+                <div className="flex gap-2">
+                  <input
+                    type="file"
+                    accept=".js,.jsx"
+                    className="hidden"
+                    ref={fileInputRef}
+                    onChange={(e) => handleFileUpload(e.target.files[0])}
+                  />
+                  <button
+                    className="btn btn-sm btn-outline"
+                    onClick={() => fileInputRef.current.click()}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                    </svg>
+                    Upload File
+                  </button>
+                  {inputCode && (
+                    <button
+                      className="btn btn-sm btn-outline btn-error"
+                      onClick={() => setInputCode('')}
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
+              </div>
+              <div
+                className={`relative ${isDragging ? 'ring-2 ring-primary ring-offset-2' : ''}`}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+              >
+                {isDragging && (
+                  <div className="absolute inset-0 bg-base-200 bg-opacity-90 flex items-center justify-center z-10 border-2 border-dashed border-primary rounded-lg">
+                    <p className="text-lg font-semibold">Drop your file here</p>
+                  </div>
+                )}
+                <textarea 
+                  className="textarea textarea-bordered h-96 font-mono text-sm whitespace-pre w-full"
+                  placeholder="Paste your React JS code here or drag & drop a file..."
+                  value={inputCode}
+                  onChange={(e) => setInputCode(e.target.value)}
+                  style={{ tabSize: 2 }}
+                />
+              </div>
             </div>
           </div>
           <div className="card bg-base-200">

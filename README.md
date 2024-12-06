@@ -44,7 +44,7 @@ A modern web application that helps developers transform React web components in
 
 1. **Clone the repository**
    ```bash
-   git clone [your-repo-url]
+   git clone https://github.com/onesmuskipchumba0/web-2-native
    cd web-2-native
    ```
 

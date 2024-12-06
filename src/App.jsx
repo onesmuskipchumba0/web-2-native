@@ -297,26 +297,227 @@ const Converter = () => {
   )
 }
 
-const Docs = () => (
-  <div className="min-h-screen p-8">
-    <div className="prose lg:prose-xl mx-auto">
-      <h1>Documentation</h1>
-      <h2>How to Use the Converter</h2>
-      <ol>
-        <li>Paste your React JS code in the input field</li>
-        <li>Click the Convert button</li>
-        <li>Review the generated React Native code</li>
-        <li>Copy and use in your React Native project</li>
-      </ol>
-      <h2>Conversion Guidelines</h2>
-      <ul>
-        <li>HTML elements will be converted to their React Native equivalents</li>
-        <li>CSS properties will be transformed into React Native style objects</li>
-        <li>Event handlers will be adapted for mobile interactions</li>
-      </ul>
+const Docs = () => {
+  const [activeTab, setActiveTab] = useState('overview')
+
+  const codeExample = `// React JS Code
+function Button({ onClick, children }) {
+  return (
+    <button 
+      className="bg-blue-500 text-white p-4 rounded"
+      onClick={onClick}
+    >
+      {children}
+    </button>
+  )
+}`
+
+  const convertedExample = `// React Native Code
+import { TouchableOpacity, Text } from 'react-native';
+
+function Button({ onPress, children }) {
+  return (
+    <TouchableOpacity 
+      style={{
+        backgroundColor: '#3B82F6',
+        padding: 16,
+        borderRadius: 8,
+      }}
+      onPress={onPress}
+    >
+      <Text style={{ color: '#FFFFFF' }}>
+        {children}
+      </Text>
+    </TouchableOpacity>
+  )
+}`
+
+  const conversionRules = [
+    {
+      title: 'HTML Elements',
+      original: '<div>, <p>, <span>',
+      converted: '<View>, <Text>, <Text>',
+      description: 'Basic HTML elements are converted to their React Native equivalents.'
+    },
+    {
+      title: 'Event Handlers',
+      original: 'onClick, onChange',
+      converted: 'onPress, onChangeText',
+      description: 'DOM events are mapped to React Native touch events.'
+    },
+    {
+      title: 'Styling',
+      original: 'className with CSS',
+      converted: 'style with React Native properties',
+      description: 'CSS classes are converted to inline styles with React Native compatible properties.'
+    },
+    {
+      title: 'Images',
+      original: '<img src="..." />',
+      converted: '<Image source={require("...")} />',
+      description: 'Image elements are converted to React Native Image components with proper source handling.'
+    }
+  ]
+
+  const sections = {
+    overview: (
+      <div className="space-y-6">
+        <div className="card bg-base-200">
+          <div className="card-body">
+            <h2 className="card-title text-2xl">What is Web2Native?</h2>
+            <p className="text-lg">
+              Web2Native is a powerful tool that converts your React JS web components into React Native code, 
+              making it easier to transition from web to mobile development. It handles the conversion of HTML elements, 
+              styling, and event handlers automatically.
+            </p>
+          </div>
+        </div>
+
+        <div className="card bg-base-200">
+          <div className="card-body">
+            <h2 className="card-title text-2xl">Key Features</h2>
+            <ul className="list-disc list-inside space-y-2">
+              <li>Automatic conversion of HTML elements to React Native components</li>
+              <li>CSS to React Native style conversion</li>
+              <li>Event handler mapping</li>
+              <li>Support for file upload and drag-and-drop</li>
+              <li>Proper code formatting and indentation</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    ),
+    examples: (
+      <div className="space-y-6">
+        <div className="card bg-base-200">
+          <div className="card-body">
+            <h2 className="card-title text-2xl">Example Conversion</h2>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div>
+                <h3 className="text-lg font-semibold mb-2">React JS Input:</h3>
+                <pre className="bg-base-300 p-4 rounded-lg overflow-x-auto">
+                  <code>{codeExample}</code>
+                </pre>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold mb-2">React Native Output:</h3>
+                <pre className="bg-base-300 p-4 rounded-lg overflow-x-auto">
+                  <code>{convertedExample}</code>
+                </pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    ),
+    rules: (
+      <div className="space-y-6">
+        <div className="card bg-base-200">
+          <div className="card-body">
+            <h2 className="card-title text-2xl">Conversion Rules</h2>
+            <div className="overflow-x-auto">
+              <table className="table table-zebra w-full">
+                <thead>
+                  <tr>
+                    <th>Type</th>
+                    <th>React JS</th>
+                    <th>React Native</th>
+                    <th>Description</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {conversionRules.map((rule, index) => (
+                    <tr key={index}>
+                      <td className="font-semibold">{rule.title}</td>
+                      <td><code>{rule.original}</code></td>
+                      <td><code>{rule.converted}</code></td>
+                      <td>{rule.description}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    ),
+    tips: (
+      <div className="space-y-6">
+        <div className="card bg-base-200">
+          <div className="card-body">
+            <h2 className="card-title text-2xl">Best Practices</h2>
+            <div className="space-y-4">
+              <div className="alert alert-info">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-current shrink-0 w-6 h-6">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <div>
+                  <h3 className="font-bold">Clean Your Code First</h3>
+                  <p>Remove any web-specific features and unused imports before conversion.</p>
+                </div>
+              </div>
+
+              <div className="alert alert-success">
+                <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div>
+                  <h3 className="font-bold">Use Simple Styling</h3>
+                  <p>Stick to basic CSS properties that have direct React Native equivalents.</p>
+                </div>
+              </div>
+
+              <div className="alert alert-warning">
+                <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <div>
+                  <h3 className="font-bold">Check Platform-Specific Code</h3>
+                  <p>Review and adjust any code that relies on web-specific APIs or features.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen p-8 max-w-7xl mx-auto">
+      <h1 className="text-4xl font-bold mb-8">Documentation</h1>
+      
+      <div className="tabs tabs-boxed mb-6">
+        <a 
+          className={`tab ${activeTab === 'overview' ? 'tab-active' : ''}`}
+          onClick={() => setActiveTab('overview')}
+        >
+          Overview
+        </a>
+        <a 
+          className={`tab ${activeTab === 'examples' ? 'tab-active' : ''}`}
+          onClick={() => setActiveTab('examples')}
+        >
+          Examples
+        </a>
+        <a 
+          className={`tab ${activeTab === 'rules' ? 'tab-active' : ''}`}
+          onClick={() => setActiveTab('rules')}
+        >
+          Conversion Rules
+        </a>
+        <a 
+          className={`tab ${activeTab === 'tips' ? 'tab-active' : ''}`}
+          onClick={() => setActiveTab('tips')}
+        >
+          Best Practices
+        </a>
+      </div>
+
+      {sections[activeTab]}
     </div>
-  </div>
-)
+  )
+}
 
 function App() {
   return (

@@ -70,12 +70,23 @@ const Converter = () => {
       'img': 'Image',
       'ul': 'View',
       'li': 'View',
+      'a': 'TouchableOpacity',
       'h1': 'Text',
       'h2': 'Text',
       'h3': 'Text',
       'h4': 'Text',
       'h5': 'Text',
       'h6': 'Text',
+    }
+
+    // Heading styles mapping
+    const headingStyles = {
+      'h1': { fontSize: 30, fontWeight: 'bold', marginBottom: 10 },
+      'h2': { fontSize: 24, fontWeight: 'bold', marginBottom: 8 },
+      'h3': { fontSize: 20, fontWeight: 'bold', marginBottom: 6 },
+      'h4': { fontSize: 18, fontWeight: 'bold', marginBottom: 4 },
+      'h5': { fontSize: 16, fontWeight: 'bold', marginBottom: 4 },
+      'h6': { fontSize: 14, fontWeight: 'bold', marginBottom: 4 },
     }
 
     // Replace HTML elements with React Native components
@@ -85,13 +96,33 @@ const Converter = () => {
       convertedCode = convertedCode.replace(regex, `<${native}$1`)
       const closeRegex = new RegExp(`</${html}>`, 'g')
       convertedCode = convertedCode.replace(closeRegex, `</${native}>`)
+
+      // Add default styles for headings
+      if (headingStyles[html]) {
+        const styleRegex = new RegExp(`<${native}([^>]*)>`, 'g')
+        convertedCode = convertedCode.replace(styleRegex, (match, attributes) => {
+          const styleString = Object.entries(headingStyles[html])
+            .map(([key, value]) => `${key}: '${value}'`)
+            .join(', ')
+          if (attributes.includes('style=')) {
+            return match.replace('style={', `style={{...{${styleString}}, `)
+          } else {
+            return `<${native}${attributes} style={{${styleString}}}>`
+          }
+        })
+      }
+    })
+
+    // Convert anchor tags href to onPress
+    convertedCode = convertedCode.replace(/href="([^"]*)"/g, (match, url) => {
+      return `onPress={() => Linking.openURL('${url}')}`
     })
 
     // Convert className to style
     convertedCode = convertedCode.replace(/className=/g, 'style=')
 
     // Convert CSS-style strings to React Native style objects
-    convertedCode = convertedCode.replace(/style="([^"]*)"/, (match, styles) => {
+    convertedCode = convertedCode.replace(/style="([^"]*)"/g, (match, styles) => {
       const styleObj = styles.split(';')
         .filter(style => style.trim())
         .map(style => {
@@ -108,7 +139,7 @@ const Converter = () => {
     convertedCode = convertedCode.replace(/onClick/g, 'onPress')
 
     // Add necessary imports
-    const imports = `import { View, Text, TouchableOpacity, TextInput, Image } from 'react-native';\n\n`
+    const imports = `import { View, Text, TouchableOpacity, TextInput, Image, Linking } from 'react-native';\n\n`
 
     return formatCode(imports + convertedCode)
   }
